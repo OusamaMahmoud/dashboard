@@ -1,7 +1,7 @@
 import axios, { CanceledError } from "axios";
 
 const apiClient = axios.create({
-  baseURL: "https://admin.womniz.com/api/v1/dashboard",
+  baseURL: "https://api-yeshtery.dev.meetusvr.com/v1/yeshtery/token",
 });
 
 export { CanceledError };
