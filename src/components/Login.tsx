@@ -3,10 +3,8 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
-import Cookies from "js-cookie";
 import { useNavigate } from "react-router";
 import { useAuth } from "../context/AuthProvider";
-import { RiLockPasswordLine } from "react-icons/ri";
 
 // Define Zod schema
 const loginSchema = z.object({
