@@ -5,7 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { clearToken } = useAuthStore();
+  const { clearToken, isAuthanticated } = useAuthStore();
   // Check if the current path is the login page
   const isLoginPage = location.pathname === "/login";
 
@@ -21,18 +21,20 @@ export default function App() {
                   Dashboard
                 </Link>
               </li>
-              <li>
-                <button
-                  onClick={() => {
-                    clearToken();
-                    toast.success("Logout Successful!");
-                    navigate("/login");
-                  }}
-                  className="btn bg-[#9414FF] py-1 px-3 w-fit rounded-lg text-white"
-                >
-                  Logout
-                </button>
-              </li>
+              {isAuthanticated && (
+                <li>
+                  <button
+                    onClick={() => {
+                      clearToken();
+                      toast.success("Logout Successful!");
+                      navigate("/login");
+                    }}
+                    className="btn bg-[#9414FF] py-1 px-3 w-fit rounded-lg text-white"
+                  >
+                    Logout
+                  </button>
+                </li>
+              )}
             </ul>
           </nav>
         </header>
