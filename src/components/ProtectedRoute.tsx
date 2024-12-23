@@ -1,12 +1,14 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router";
-import { useAuth } from "../context/AuthProvider";
+import { useAuthStore } from "../store/useAuthStore";
 
-const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { authState } = useAuth();
+const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const { isAuthanticated } = useAuthStore();
   const location = useLocation();
 
-  if (!authState.isAuthenticated) {
+  if (!isAuthanticated) {
     // Redirect to login if not authenticated
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

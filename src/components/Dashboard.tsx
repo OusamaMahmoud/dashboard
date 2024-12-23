@@ -1,32 +1,28 @@
-import  { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthProvider";
+import { useEffect } from "react";
 import axios from "axios";
-
-interface UserInfo {
-  id: string;
-  name: string;
-}
+import { useAuthStore } from "../store/useAuthStore";
 
 const Dashboard = () => {
-  const { authState, logout } = useAuth(); // Assuming `useAuth` is where authentication context is managed
-  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const { isAuthanticated, userInfo, token, setUserInfo } = useAuthStore();
 
   useEffect(() => {
-    if (authState.token) {
+    if (isAuthanticated && token) {
       // Call the user info API if token exists
       const fetchUserInfo = async () => {
         try {
-          const response = await axios.get("https://api-yeshtery.dev.meetusvr.com/v1/user/info", {
-            headers: {
-              Authorization: `Bearer ${authState.token}`,
-            },
-            params: {
-              email: "dev.aert@gmail.com", // Replace with dynamic email if needed
-              password: "helloworld", // Replace with dynamic password if needed
-              isEmployee: true,
-            },
-          });
+          const response = await axios.get(
+            "https://api-yeshtery.dev.meetusvr.com/v1/user/info",
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              params: {
+                email: "dev.aert@gmail.com", // Replace with dynamic email if needed
+                password: "helloworld", // Replace with dynamic password if needed
+                isEmployee: true,
+              },
+            }
+          );
 
           if (response.status === 200) {
             setUserInfo({
@@ -36,21 +32,19 @@ const Dashboard = () => {
           }
         } catch (err: any) {
           console.error(err);
-          setError("Failed to fetch user info.");
         }
       };
 
       fetchUserInfo();
     }
-  }, [authState.token]); // Run this effect when the token changes
+  }, [token, isAuthanticated]); // Run this effect when the token changes
 
-  if (!authState.token) {
+  if (!token) {
     return <div>Please log in to view the dashboard.</div>;
   }
 
   return (
     <div>
-      {error && <div>{error}</div>}
       {userInfo ? (
         <div className="flex flex-col gap-4 p-10">
           <h1 className="text-lg font-bold">
@@ -59,19 +53,18 @@ const Dashboard = () => {
           <p className="text-lg font-bold">
             User Name: <span className="text-xl ">{userInfo.name}!</span>
           </p>
-
-          <button
-            onClick={() => {
-              logout();
-              //   navigate("/login");
-            }}
-            className="btn bg-[#9414FF] py-2 px-3 w-fit rounded-lg text-white"
-          >
-            Logout
-          </button>
         </div>
       ) : (
-        <div>Loading user information...</div>
+        <div className="flex w-96 flex-col gap-4 mt-4">
+          <div className="flex items-center gap-4">
+            <div className="skeleton h-16 w-16 shrink-0 rounded-full"></div>
+            <div className="flex flex-col gap-4">
+              <div className="skeleton h-4 w-20"></div>
+              <div className="skeleton h-4 w-28"></div>
+            </div>
+          </div>
+          <div className="skeleton h-32 w-full"></div>
+        </div>
       )}
     </div>
   );

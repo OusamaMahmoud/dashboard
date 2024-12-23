@@ -4,8 +4,9 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios from "axios";
 import { useNavigate } from "react-router";
-import { useAuth } from "../context/AuthProvider";
-
+import { useAuthStore } from "../store/useAuthStore";
+import { toast, ToastContainer } from "react-toastify"; // Import toast
+import { FaEnvelope, FaLock } from "react-icons/fa";
 // Define Zod schema
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -19,7 +20,7 @@ type LoginSchema = z.infer<typeof loginSchema>;
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login, authState } = useAuth();
+  const { setToken, isAuthanticated, token } = useAuthStore();
   const {
     register,
     handleSubmit,
@@ -29,10 +30,10 @@ const Login: React.FC = () => {
   });
 
   useEffect(() => {
-    if (authState.token) {
-      navigate("/dashboard");
+    if (isAuthanticated) {
+      navigate("/dashboard"); // Navigate to dashboard if authenticated
     }
-  }, [authState.token, navigate]);
+  }, [isAuthanticated, token]);
 
   const onSubmit = async (data: LoginSchema) => {
     console.log("Login Data:", data);
@@ -57,45 +58,58 @@ const Login: React.FC = () => {
       const { token } = response.data;
 
       console.log("Login Successful. Token:", token);
-      login(token);
+      setToken(token); // Set token in the Zustand store
 
-      // Redirect to dashboard or update app state
+      // Show toast message
+      toast.success("Login Successful!");
 
+      // Navigate to dashboard after 2 seconds
       navigate("/dashboard");
     } catch (error) {
       // Handle errors
       if (axios.isAxiosError(error) && error.response) {
         console.error("Error Response:", error.response.data);
-        alert(
+        toast.error(
           `Login failed: ${error.response.data.message || "Unknown error"}`
         );
       } else {
         console.error("Error:", error);
-        alert("An unexpected error occurred.");
+        toast.error("An unexpected error occurred.");
       }
     }
   };
 
   return (
-    <div className="relative flex flex-col sm:flex-row items-center justify-around px-10">
+    <div className="relative h-full flex flex-col sm:flex-row items-center justify-around px-10 py-4 bg-gradient-to-r from-[#E477F6] to-[#9E77F6] overflow-hidden">
+      {/* Background with circular blurred gradient effect */}
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_left,_#FFFFFF,_transparent)] opacity-80 backdrop-blur-xl"></div>
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top_right,_#FFFFFF,_transparent)] opacity-80 backdrop-blur-lg"></div>
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_bottom_left,_#FFFFFF,_transparent)] opacity-80 backdrop-blur-lg"></div>
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_bottom_right,_#FFFFFF,_transparent)] opacity-60 backdrop-blur-lg"></div>
+
+      {/* Login Form */}
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col items-center justify-center max-w-[380px] order-2 sm:order-1"
+        className="flex flex-col items-center justify-center max-w-[380px] order-2 sm:order-1 z-10 relative"
       >
-        <h1 className="text-[56px]  mb-4 text-center">Welcome back</h1>
+        <ToastContainer />
+        <h1 className="text-[56px] mb-4 text-center">Welcome back</h1>
         <p className="text-lg text-[#62626B] max-w-lg text-center mb-8">
           Step into our shopping metaverse for an unforgettable shopping
           experience
         </p>
 
         {/* Email Field */}
-        <div className="mb-4 w-full">
+        <div className="mb-4 w-full relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <FaEnvelope />
+          </div>
           <input
             placeholder="Email"
             type="email"
             id="email"
             {...register("email")}
-            className={`w-full  px-2 py-2 border rounded ${
+            className={`w-full pl-10 px-2 py-2 border rounded ${
               errors.email ? "border-red-500" : "border-gray-300"
             }`}
           />
@@ -105,13 +119,16 @@ const Login: React.FC = () => {
         </div>
 
         {/* Password Field */}
-        <div className="mb-6 w-full">
+        <div className="mb-6 w-full relative">
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <FaLock />
+          </div>
           <input
-            placeholder="password"
+            placeholder="Password"
             type="password"
             id="password"
             {...register("password")}
-            className={` w-full px-2  py-2 border rounded ${
+            className={`w-full pl-10 px-2 py-2 border rounded ${
               errors.password ? "border-red-500" : "border-gray-300"
             }`}
           />
@@ -131,7 +148,9 @@ const Login: React.FC = () => {
           Login
         </button>
       </form>
-      <section className="relative order-1 sm:order-2">
+
+      {/* Right Image Section */}
+      <section className="relative order-1 sm:order-2 z-10">
         <img
           src="/assets/login/meet.png"
           alt="login"
